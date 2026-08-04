@@ -1,3 +1,3 @@
 require_relative 'lib/game'
-pawn = Pawn.new
-puts pawn.type
+game = Game.new
+puts game.to_fen
