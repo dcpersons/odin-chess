@@ -2,7 +2,7 @@ require_relative 'square'
 require_relative 'pieces'
 
 class Game
-  attr_reader :board
+  attr_reader :board, :turn, :castle_rights, :en_passant, :draw_moves, :turn_number
 
   def initialize(fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
     @board = make_board
@@ -10,10 +10,10 @@ class Game
   end
 
   def make_board
-    board = { 'a' => Array.new(9), 'b' => Array.new(9), 'c' => Array.new(9), 'd' => Array.new(9),
-              'e' => Array.new(9), 'f' => Array.new(9), 'g' => Array.new(9), 'h' => Array.new(9) }
-    board.each_key do |column|
-      9.times { |row| board[column][row] = Square.new(column, row) unless row.zero? }
+    board = { 'a' => [], 'b' => [], 'c' => [], 'd' => [],
+              'e' => [], 'f' => [], 'g' => [], 'h' => [] }
+    board.each_key do |file|
+      9.times { |rank| board[file][rank] = Square.new(file, rank, self) unless rank.zero? }
     end
     board
   end
@@ -27,16 +27,22 @@ class Game
     setup_variables(fen_variables)
   end
 
+  def to_fen
+    "#{board_to_fen} #{variables_to_fen}"
+  end
+
+  private
+
   def setup_board(fen)
-    8.downto(1) do |row|
+    8.downto(1) do |rank|
       8.times do |n|
         if fen[0].is_a?(Integer)
           fen[0] -= 1
           fen.shift if fen[0].zero?
           next
         end
-        column = ('a'.ord + n).chr
-        @board[column][row].set_piece(fen.shift)
+        file = ('a'.ord + n).chr
+        @board[file][rank].setup_piece(fen.shift)
       end
     end
   end
@@ -49,26 +55,22 @@ class Game
     @turn_number = fen.shift.to_i
   end
 
-  def to_fen
-    "#{board_to_fen} #{variables_to_fen}"
-  end
-
   def board_to_fen
     fen = []
-    8.downto(1) do |row|
+    8.downto(1) do |rank|
       9.times do |n|
         next fen << '/' if n == 8
 
-        column = ('a'.ord + n).chr
-        if @board[column][row].piece.nil?
+        file = ('a'.ord + n).chr
+        if @board[file][rank].piece.nil?
           fen << 0 unless fen[-1].is_a?(Integer)
           fen[-1] += 1
         else
-          fen << @board[column][row].piece.to_letter
+          fen << @board[file][rank].piece.to_letter
         end
       end
     end
-    fen.join
+    fen.join.slice(0..-2)
   end
 
   def variables_to_fen

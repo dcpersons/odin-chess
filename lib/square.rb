@@ -1,29 +1,23 @@
 class Square
-  attr_reader :coord, :column, :row
+  attr_reader :coord, :file, :rank
   attr_accessor :piece
 
-  def initialize(column, row)
-    @column = column
-    @row = row
-    @coord = column + row.to_s
-    @piece = nil
+  def initialize(file, rank, game)
+    @game = game
+    @file = file
+    @rank = rank
+    @coord = file + rank.to_s
   end
 
-  def set_piece(letter)
+  def setup_piece(letter)
     color = letter.match?(/[[:upper:]]/) ? 'white' : 'black'
-    @piece = case letter.downcase
-             when 'r'
-               Rook.new(color, @column, @row)
-             when 'n'
-               Knight.new(color, @column, @row)
-             when 'b'
-               Bishop.new(color, @column, @row)
-             when 'q'
-               Queen.new(color, @column, @row)
-             when 'k'
-               King.new(color, @column, @row)
-             when 'p'
-               Pawn.new(color, @column, @row)
-             end
+    pieces = { 'r' => Rook, 'n' => Knight, 'b' => Bishop, 'q' => Queen, 'k' => King, 'p' => Pawn }
+    @piece = pieces[letter.downcase].new(color, @file, @rank, @game)
+  end
+
+  def empty?
+    return true if @piece.nil?
+
+    false
   end
 end

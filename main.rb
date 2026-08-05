@@ -1,3 +1,4 @@
 require_relative 'lib/game'
 game = Game.new
-puts game.to_fen
+square = Square.new('a', 1, game)
+square.setup_piece('p')
