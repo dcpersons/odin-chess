@@ -27,14 +27,13 @@ class Pieces
   end
 
   def empty_space?(move)
-    p "#{move[0]}#{move[1]}"
-    return true if @game.board[move[0]][move[1]].piece.nil?
+    return true if move && @game.board[move[0]][move[1]].piece.nil?
 
     false
   end
 
-  def other_color?(move, color)
-    return false if empty_space?(move) || @game.board[move[0]][move[1]].piece.color == color
+  def other_color?(move)
+    return false if @game.board[move[0]][move[1]].piece.nil? || @game.board[move[0]][move[1]].piece.color == color
 
     true
   end

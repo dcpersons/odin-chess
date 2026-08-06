@@ -9,6 +9,7 @@ class Pawn < Pieces
     moves.delete(:double_step) unless empty_space?(moves[:double_step])
     moves.delete(:take_left) unless valid_take?(moves[:take_left])
     moves.delete(:take_right) unless valid_take?(moves[:take_right])
+    moves.values
   end
 
   private
@@ -19,7 +20,7 @@ class Pawn < Pieces
               take_left: [(@file.ord - 1).chr, @rank + 1],
               take_right: [(@file.ord + 1).chr, @rank + 1] }
 
-    moves.delete_if { |_, move| off_board?(move) }
+    moves.delete_if { |_, move| !on_board?(move) }
   end
 
   def black_moves
@@ -28,12 +29,12 @@ class Pawn < Pieces
               take_left: [(@file.ord - 1).chr, @rank - 1],
               take_right: [(@file.ord + 1).chr, @rank - 1] }
 
-    moves.delete_if { |_, move| off_board?(move) }
+    moves.delete_if { |_, move| !on_board?(move) }
   end
 
   def valid_take?(move)
-    return true if @game.en_passant == move.join ||
-                   other_color?(move, @color)
+    return true if move && (@game.en_passant == move.join ||
+                   other_color?(move))
 
     false
   end
