@@ -20,20 +20,24 @@ class Pieces
     letter
   end
 
+  def valid_moves
+    []
+  end
+
   private
 
   def on_board?(move)
-    move[0].match?(/^[a-h]+$/i) && (1..8).include?(move[1])
+    move && move[0]&.match?(/^[a-h]+$/i) && (1..8).include?(move[1])
   end
 
   def empty_space?(move)
-    return true if move && @game.board[move[0]][move[1]].piece.nil?
+    return true if move && @game.piece_at(move).nil?
 
     false
   end
 
   def other_color?(move)
-    return false if @game.board[move[0]][move[1]].piece.nil? || @game.board[move[0]][move[1]].piece.color == color
+    return false if empty_space?(move) || @game.piece_at(move).color == @color
 
     true
   end

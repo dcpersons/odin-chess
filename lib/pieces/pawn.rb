@@ -20,7 +20,7 @@ class Pawn < Pieces
               take_left: [(@file.ord - 1).chr, @rank + 1],
               take_right: [(@file.ord + 1).chr, @rank + 1] }
 
-    moves.delete_if { |_, move| !on_board?(move) }
+    moves.compact.delete_if { |_, move| !on_board?(move) }
   end
 
   def black_moves
@@ -29,7 +29,7 @@ class Pawn < Pieces
               take_left: [(@file.ord - 1).chr, @rank - 1],
               take_right: [(@file.ord + 1).chr, @rank - 1] }
 
-    moves.delete_if { |_, move| !on_board?(move) }
+    moves.compact.delete_if { |_, move| !on_board?(move) }
   end
 
   def valid_take?(move)
