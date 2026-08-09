@@ -3,12 +3,13 @@ require_relative '../pieces'
 class Pawn < Pieces
   TYPE = 'pawn'
 
-  def valid_moves
-    moves = @color == 'white' ? white_moves : black_moves
+  def valid_moves(pre_check: false)
+    moves = @color == 'w' ? white_moves : black_moves
     moves = moves.except(:single_step, :double_step) unless empty_space?(moves[:single_step])
     moves.delete(:double_step) unless empty_space?(moves[:double_step])
     moves.delete(:take_left) unless valid_take?(moves[:take_left])
     moves.delete(:take_right) unless valid_take?(moves[:take_right])
+    moves.delete_if { |_, move| !pre_check && illegal_check_move?(move) }
     moves.values
   end
 

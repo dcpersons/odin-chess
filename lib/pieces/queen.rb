@@ -1,3 +1,7 @@
 class Queen < Pieces
   TYPE = 'queen'
+
+  def valid_moves(pre_check: false)
+    cardinal_moves(pre_check: pre_check) | diagonal_moves(pre_check: pre_check)
+  end
 end
