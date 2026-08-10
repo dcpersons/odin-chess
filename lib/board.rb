@@ -20,6 +20,32 @@ module Board
     setup_variables(fen_variables)
   end
 
+  def on_board?(move)
+    move && move[0]&.match?(/^[a-h]+$/i) && (1..8).include?(move[1])
+  end
+
+  def other_color?(move, color)
+    return false if empty_space?(move) || piece_at(move).color == color
+
+    true
+  end
+
+  def empty_space?(move)
+    return true if move && piece_at(move).nil?
+
+    false
+  end
+
+  def piece_at(coord)
+    board.dig(coord[0], coord[1])&.piece
+  end
+
+  def square_at(coord)
+    raise(StandardError, 'Invalid coordinate') if board.dig(coord[0], coord[1]).nil?
+
+    board.dig(coord[0], coord[1])
+  end
+
   private
 
   def setup_board(fen)

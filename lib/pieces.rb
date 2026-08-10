@@ -17,15 +17,29 @@ class Pieces
     color == 'w' ? type.chr.upcase : type.chr
   end
 
-  def valid_moves(pre_check: false)
-    []
+  def illegal_check_move?(move)
+    sim_game = Game.new(@game.to_fen)
+    if move == ['O-O-O']
+      sim_game.piece_at(coord).castle_queenside
+    elsif move == ['O-O']
+      sim_game.piece_at(coord).castle_kingside
+    else
+      sim_game.square_at(coord).piece = nil
+      sim_game.square_at(move).place_piece(to_letter)
+    end
+    sim_game.check?
   end
 
-  def illegal_check_move?(move)
-    sim_game = @game.clone
-    sim_game.square_at(coord).piece = nil
-    sim_game.square_at(move).place_piece(to_letter)
-    sim_game.check?
+  def castle_value
+    'N/A'
+  end
+
+  def file_left(file = @file)
+    (file.ord - 1).chr
+  end
+
+  def file_right(file = @file)
+    (file.ord + 1).chr
   end
 
   private
@@ -46,116 +60,90 @@ class Pieces
 
   def up(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [move[0], move[1] + 1]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
   end
 
   def down(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [move[0], move[1] - 1]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
   end
 
   def left(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [file_left(move[0]), move[1]]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
   end
 
   def right(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [file_right(move[0]), move[1]]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
   end
 
   def up_left(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [file_left(move[0]), move[1] + 1]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
   end
 
   def up_right(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [file_right(move[0]), move[1] + 1]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
   end
 
   def down_left(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [file_left(move[0]), move[1] - 1]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
   end
 
   def down_right(move)
     moves = []
-    until !on_board?(move) || @game.piece_at(move) && move != coord
+    until !@game.on_board?(move) || @game.piece_at(move) && move != coord
       move = [file_right(move[0]), move[1] - 1]
-      break unless on_board?(move)
+      break unless @game.on_board?(move)
 
-      moves << move if empty_space?(move) || other_color?(move)
+      moves << move if @game.empty_space?(move) || @game.other_color?(move, color)
     end
     moves
-  end
-
-  def on_board?(move)
-    move && move[0]&.match?(/^[a-h]+$/i) && (1..8).include?(move[1])
-  end
-
-  def empty_space?(move)
-    return true if move && @game.piece_at(move).nil?
-
-    false
-  end
-
-  def other_color?(move)
-    return false if empty_space?(move) || @game.piece_at(move).color == color
-
-    true
-  end
-
-  private
-
-  def file_left(file = @file)
-    (file.ord - 1).chr
-  end
-
-  def file_right(file = @file)
-    (file.ord + 1).chr
   end
 end
 
