@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Queen < Pieces
   TYPE = 'queen'
 

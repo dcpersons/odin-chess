@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Square
   attr_reader :coord, :file, :rank
   attr_accessor :piece

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Pieces
   attr_reader :color, :file, :rank, :coord
 
@@ -7,6 +9,7 @@ class Pieces
     @file = file
     @rank = rank
     @coord = [file, rank]
+    @game.pawn_move = false
   end
 
   def type

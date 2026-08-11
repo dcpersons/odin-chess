@@ -1,7 +1,14 @@
+# frozen_string_literal: true
+
 require_relative '../pieces'
 
 class Pawn < Pieces
   TYPE = 'pawn'
+
+  def initialize(color, file, rank, game)
+    super
+    @game.pawn_move = true
+  end
 
   def valid_moves(pre_check: false)
     moves = @color == 'w' ? white_moves : black_moves

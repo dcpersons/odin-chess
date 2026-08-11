@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Board
   def to_fen
     "#{board_to_fen} #{variables_to_fen}"
@@ -54,10 +56,10 @@ module Board
         if fen[0].is_a?(Integer)
           fen[0] -= 1
           fen.shift if fen[0].zero?
-          next
+        else
+          file = ('a'.ord + n).chr
+          square_at([file, rank]).place_piece(fen.shift)
         end
-        file = ('a'.ord + n).chr
-        @board[file][rank].place_piece(fen.shift)
       end
     end
   end
@@ -77,11 +79,11 @@ module Board
         next fen << '/' if n == 8
 
         file = ('a'.ord + n).chr
-        if @board[file][rank].piece.nil?
+        if empty_space?([file, rank])
           fen << 0 unless fen[-1].is_a?(Integer)
           fen[-1] += 1
         else
-          fen << @board[file][rank].piece.to_letter
+          fen << piece_at([file, rank]).to_letter
         end
       end
     end
@@ -89,6 +91,6 @@ module Board
   end
 
   def variables_to_fen
-    [@turn, @castle_rights, @en_passant, @draw_moves, @turn_number].join(' ')
+    [@turn, @castle_rights, @en_passant, @draw_moves, @turn_number.to_i].join(' ')
   end
 end
