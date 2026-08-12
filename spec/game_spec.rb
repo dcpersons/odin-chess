@@ -45,17 +45,6 @@ describe Game do
       end
     end
 
-    context 'when an invalid move is given' do
-      it 'raises an error if piece is incapable of that move' do
-        expect { game.move(['a', 2], ['b', 6]) }.to raise_error('Invalid move')
-      end
-
-      it 'raises an error if it would leave current player in check' do
-        game.square_at(['d', 2]).place_piece('p')
-        expect { game.move(['a', 2], ['a', 3]) }.to raise_error('Invalid move')
-      end
-    end
-
     context 'when move is en passant' do
       it 'removes the piece below if current player is white' do
         game = described_class.new('rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1')
@@ -136,6 +125,14 @@ describe Game do
         expect { game.move(king.coord, ['e', 2]) }.to change(game, :turn).to('b')
       end
     end
+
+    context 'when promoting a pawn' do
+      it 'moves and promotes pawn if promotion is specified' do
+        game.square_at(['a', 7]).place_piece('P')
+        game.move(['a', 7], ['b', 8], 'Q')
+        expect(game.piece_at(['b', 8])).to be_a(Queen)
+      end
+    end
   end
 
   describe '#check?' do
@@ -197,7 +194,7 @@ describe Game do
       end
     end
 
-    context 'letter, target, file, and row are given' do
+    context 'when letter, target, file, and row are given' do
       it 'returns the piece' do
         expect(game.find_piece('P', 'a', 2, ['a', 3]).coord).to eq(['a', 2])
       end
@@ -205,17 +202,27 @@ describe Game do
   end
 
   describe '#decipher' do
+    it 'raises an error if no piece at location' do
+      expect { game.decipher('a3a4') }.to raise_error(StandardError, 'Invalid move')
+    end
+
+    it 'raises an error if piece at location cannot perform move to target' do
+      expect { game.decipher('a2a5') }.to raise_error(StandardError, 'Invalid move')
+    end
+
+    it 'requires an addition letter at the end when promoting a pawn' do
+      game.square_at(['a', 7]).place_piece('P')
+      expect(game.decipher('a7b8Q')).to eq([['a', 7], ['b', 8, 'Q']])
+    end
+
+    it 'raises an error when moving a pawn to last rank and no promotion is specified' do
+      game.square_at(['a', 7]).place_piece('P')
+      expect { game.decipher('a7b8') }.to raise_error(StandardError, 'Unspecified promotion')
+    end
+
     context 'when starting rank, starting file, and target are given' do
       it 'returns correct piece location and target arrays' do
         expect(game.decipher('a2a3')).to eq([['a', 2], ['a', 3]])
-      end
-
-      it 'raises an error if no piece at location' do
-        expect { game.decipher('a3a4') }.to raise_error(StandardError, 'Invalid move')
-      end
-
-      it 'raises an error if piece at location cannot perform move to target' do
-        expect { game.decipher('a2a5') }.to raise_error(StandardError, 'Invalid move')
       end
     end
 

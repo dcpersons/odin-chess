@@ -11,37 +11,39 @@ class Pawn < Pieces
   end
 
   def valid_moves(pre_check: false)
-    moves = @color == 'w' ? white_moves : black_moves
-    moves = moves.except(:single_step, :double_step) unless @game.empty_space?(moves[:single_step])
-    moves.delete(:double_step) unless @game.empty_space?(moves[:double_step])
-    moves.delete(:take_left) unless valid_take?(moves[:take_left])
-    moves.delete(:take_right) unless valid_take?(moves[:take_right])
-    moves.delete_if { |_, move| !pre_check && illegal_check_move?(move) }
-    moves.values
+    moves = color == 'w' ? white_moves : black_moves
+    moves.keep_if { |move| @game.on_board?(move) && (valid_step?(move) || valid_take?(move)) }
+    moves.delete_if { |move| !pre_check && illegal_check_move?(move) }
+    moves = moves.product(%w[R N B Q]).map(&:flatten) if promotable?
+    moves
+  end
+
+  def promotable?
+    color == 'w' && rank == 7 || color == 'b' && rank == 2
   end
 
   private
 
   def white_moves
-    moves = { single_step: [@file, @rank + 1],
-              double_step: ([@file, @rank + 2] if @rank == 2),
-              take_left: [(@file.ord - 1).chr, @rank + 1],
-              take_right: [(@file.ord + 1).chr, @rank + 1] }
-
-    moves.compact.delete_if { |_, move| !@game.on_board?(move) }
+    [[@file, @rank + 1], [@file, @rank + 2],
+     [file_left(@file), @rank + 1], [file_right(@file), @rank + 1]]
   end
 
   def black_moves
-    moves = { single_step: [@file, @rank - 1],
-              double_step: ([@file, @rank - 2] if @rank == 7),
-              take_left: [(@file.ord - 1).chr, @rank - 1],
-              take_right: [(@file.ord + 1).chr, @rank - 1] }
+    [[@file, @rank - 1], [@file, @rank - 2],
+     [file_left(@file), @rank - 1], [file_right(@file), @rank - 1]]
+  end
 
-    moves.compact.delete_if { |_, move| !@game.on_board?(move) }
+  def valid_step?(move)
+    return true if @game.empty_space?(move) && move[0] == file &&
+                   ([rank + 1, rank - 1].include?(move[1]) || rank == 2 || rank == 7)
+
+    false
   end
 
   def valid_take?(move)
-    return true if move && (@game.en_passant == move.join ||
+    return true if move[0] != file &&
+                   (@game.en_passant == move.join ||
                    @game.other_color?(move, color))
 
     false

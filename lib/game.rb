@@ -37,29 +37,28 @@ class Game
     end
   end
 
-  def move(start, target)
+  def move(start, target, promotion = nil)
     piece = piece_at(start)
-    raise(StandardError, 'Invalid move') unless piece.valid_moves.include?(target)
 
     if target == ['O-O-O'] then castle_queenside
     elsif target == ['O-O'] then castle_kingside
-    else standard_move(start, target, piece)
+    else standard_move(start, target, piece, promotion)
     end
     update_variables(start, target, piece.castle_value)
   end
 
   def check?
-    pieces = find_pieces(next_turn, both_kings: true)
-    king = pieces.find { |piece| piece.instance_of?(King) && piece.color == @turn }
-    pieces.any? { |piece| piece.valid_moves(pre_check: true).include?(king.coord) }
+    pieces = find_pieces(next_turn)
+    king = find_piece('K')
+    pieces.any? { |piece| piece.valid_moves(pre_check: true).any? { |move| move & king.coord == king.coord } }
   end
 
-  def find_pieces(color, both_kings: false)
+  def find_pieces(color)
     pieces = []
     @board.each_value do |file|
       file.each { |square| pieces << square.piece unless square&.piece.nil? }
     end
-    pieces.keep_if { |piece| piece.color == color || piece.is_a?(King) && both_kings }
+    pieces.keep_if { |piece| piece.color == color }
   end
 
   def en_passant_take(target, color)
@@ -71,13 +70,14 @@ class Game
   end
 
   def decipher(move)
-    return [find_piece('K').coord, [move]] if ['O-O-O', 'O-O'].include?(move)
+    return [find_piece('K').coord, [move]] if ['O-O-O', 'O-O'].include?(move.upcase)
 
     move = move.split('')
     letter = if %w[R N B Q K P].include?(move[0]) then move.shift
              else 'P'
              end
-    target = [move.delete_at(-2), move.pop.to_i]
+    promotion = move.pop if %w[R N B Q].include?(move.last)
+    target = [move.delete_at(-2), move.pop.to_i, promotion].compact
     file = move.shift if move[0].to_i.zero?
     rank = move.shift&.to_i
     piece = find_piece(letter, file, rank, target)
@@ -89,11 +89,12 @@ class Game
     piece = pieces.select do |piece|
       (piece.to_letter.upcase == letter) &&
         (target.nil? || piece.valid_moves.include?(target)) &&
-        (!file || piece.file == file) &&
-        (!rank || piece.rank == rank)
+        (file.nil? || piece.file == file) &&
+        (rank.nil? || piece.rank == rank)
     end
+    p target
+    raise(StandardError, 'Unspecified promotion') if piece.empty? && %w[R N B Q].include?(target[-1])
     raise(StandardError, 'Invalid move') if piece.empty?
-
     raise(StandardError, 'Unspecified piece') if piece.length > 1
 
     piece.pop
@@ -101,11 +102,12 @@ class Game
 
   private
 
-  def standard_move(start, target, piece)
+  def standard_move(start, target, piece, promotion)
+    promotion = promotion&.downcase if piece.color == 'b'
     @piece_taken = !empty_space?(target)
     en_passant_take(target, piece.color) if en_passant == target.join && piece_at(start).is_a?(Pawn)
     square_at(start).piece = nil
-    square_at(target).place_piece(piece.to_letter)
+    square_at(target).place_piece(promotion || piece.to_letter)
   end
 
   def next_turn

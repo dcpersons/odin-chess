@@ -43,5 +43,19 @@ describe Pawn do
         expect(pawn.valid_moves(pre_check: true)).to eq([['a', 3], ['a', 4]])
       end
     end
+
+    context 'when pawn is moving to final rank' do
+      it 'requires an extra letter for what to promote to' do
+        game.square_at(['a', 7]).place_piece('P')
+        promoting = game.piece_at(['a', 7])
+        expect(promoting.valid_moves).to include(['b', 8, 'B'])
+      end
+
+      it 'does not include a move that does not specify promotion' do
+        game.square_at(['a', 7]).place_piece('P')
+        promoting = game.piece_at(['a', 7])
+        expect(promoting.valid_moves).not_to include(['b', 8])
+      end
+    end
   end
 end
