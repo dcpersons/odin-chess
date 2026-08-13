@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# piece subclass for queens
 class Queen < Pieces
   TYPE = 'queen'
 

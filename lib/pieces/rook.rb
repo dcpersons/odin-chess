@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# piece subclass for rooks
 class Rook < Pieces
   TYPE = 'rook'
 

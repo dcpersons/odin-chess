@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# piece subclass for bishops
 class Bishop < Pieces
   TYPE = 'bishop'
 

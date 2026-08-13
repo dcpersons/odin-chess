@@ -27,5 +27,11 @@ describe Pieces do
       king = game.piece_at(['e', 1])
       expect(king.illegal_check_move?(['O-O-O'])).to be true
     end
+
+    it 'properly returns true for en_passant' do
+      game = Game.new('rnb1kbnr/pp1ppppp/8/1qpPK3/8/8/PPP1PPPP/RNBQ1BNR w kq c6 0 1')
+      pawn = game.piece_at(['d', 5])
+      expect(pawn.illegal_check_move?(['c', 6])).to be true
+    end
   end
 end

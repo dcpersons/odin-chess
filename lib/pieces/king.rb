@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# piece subclass for kings
 class King < Pieces
   TYPE = 'king'
 
@@ -14,6 +15,7 @@ class King < Pieces
   end
 
   def castle_queenside
+    @game.piece_taken = false
     @game.square_at(coord).piece = nil
     @game.square_at(['c', rank]).place_piece(color == 'w' ? 'K' : 'k')
     @game.square_at(['a', rank]).piece = nil
@@ -21,6 +23,7 @@ class King < Pieces
   end
 
   def castle_kingside
+    @game.piece_taken = false
     @game.square_at(coord).piece = nil
     @game.square_at(['g', rank]).place_piece(color == 'w' ? 'K' : 'k')
     @game.square_at(['h', rank]).piece = nil
@@ -39,23 +42,15 @@ class King < Pieces
   end
 
   def queen_castle?
-    if @game.castle_rights.include?(color == 'w' ? 'Q' : 'q') &&
-       @game.empty_space?(['b', rank]) &&
-       @game.empty_space?(['c', rank]) &&
-       @game.empty_space?(['d', rank])
-      true
-    else
-      false
-    end
+    @game.castle_rights.include?(color == 'w' ? 'Q' : 'q') &&
+      @game.empty_space?(['b', rank]) &&
+      @game.empty_space?(['c', rank]) &&
+      @game.empty_space?(['d', rank])
   end
 
   def king_castle?
-    if @game.castle_rights.include?(color == 'w' ? 'Q' : 'q') &&
-       @game.empty_space?(['f', rank]) &&
-       @game.empty_space?(['g', rank])
-      true
-    else
-      false
-    end
+    @game.castle_rights.include?(color == 'w' ? 'Q' : 'q') &&
+      @game.empty_space?(['f', rank]) &&
+      @game.empty_space?(['g', rank])
   end
 end

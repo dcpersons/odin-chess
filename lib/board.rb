@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# module for extra board-based methods for chess game
 module Board
   def to_fen
     "#{board_to_fen} #{variables_to_fen}"
@@ -22,35 +23,29 @@ module Board
     setup_variables(fen_variables)
   end
 
-  def on_board?(move)
-    move && move[0]&.match?(/^[a-h]+$/i) && (1..8).include?(move[1])
+  def on_board?(coord)
+    coord && coord[0]&.match?(/^[a-h]+$/i) && (1..8).include?(coord[1])
   end
 
-  def other_color?(move, color)
-    return false if empty_space?(move) || piece_at(move).color == color
-
-    true
+  def square_at(coord)
+    board.dig(coord[0], coord[1])
   end
 
-  def empty_space?(move)
-    return true if move && piece_at(move).nil?
-
-    false
+  def empty_space?(coord)
+    on_board?(coord) && piece_at(coord).nil?
   end
 
   def piece_at(coord)
     board.dig(coord[0], coord[1])&.piece
   end
 
-  def square_at(coord)
-    raise(StandardError, 'Invalid coordinate') if board.dig(coord[0], coord[1]).nil?
-
-    board.dig(coord[0], coord[1])
+  def other_color?(coord, color = @turn)
+    on_board?(coord) && !empty_space?(coord) && piece_at(coord)&.color != color
   end
 
   private
 
-  def setup_board(fen)
+  def setup_board(fen) # rubocop:disable Metrics/MethodLength
     8.downto(1) do |rank|
       8.times do |n|
         if fen[0].is_a?(Integer)
@@ -72,7 +67,7 @@ module Board
     @turn_number = fen.shift.to_i
   end
 
-  def board_to_fen
+  def board_to_fen # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
     fen = []
     8.downto(1) do |rank|
       9.times do |n|
@@ -87,10 +82,10 @@ module Board
         end
       end
     end
-    fen.join.slice(0..-2)
+    fen[0..-2].join
   end
 
   def variables_to_fen
-    [@turn, @castle_rights, @en_passant, @draw_moves, @turn_number.to_i].join(' ')
+    [@turn, @castle_rights, @en_passant, @draw_moves, @turn_number].join(' ')
   end
 end

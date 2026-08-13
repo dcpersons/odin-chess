@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# class for creating squares on chess board
 class Square
   attr_reader :coord, :file, :rank
   attr_accessor :piece

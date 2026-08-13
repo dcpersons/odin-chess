@@ -14,8 +14,8 @@ describe Game do
       expect(game.piece_at(['a', 3])).to be_nil
     end
 
-    it 'raises an error if an invalid coordinate is given' do
-      expect { game.square_at(['a', 0]) }.to raise_error('Invalid coordinate')
+    it 'returns nil if an invalid coordinate is given' do
+      expect(game.square_at(['a', 0])).to be_nil
     end
   end
 
@@ -24,8 +24,8 @@ describe Game do
       expect(game.square_at(['a', 2])).to be_a(Square)
     end
 
-    it 'raises an error if an invalid coordinate is given' do
-      expect { game.square_at(['a', 0]) }.to raise_error('Invalid coordinate')
+    it 'returns nil if invalid coordinate is given' do
+      expect(game.square_at(['z', 0])).to be_nil
     end
   end
 
@@ -65,9 +65,9 @@ describe Game do
 
     context 'when en passant value changes' do
       it 'sets it to the proper space' do
-        game.square_at(['b', 5]).place_piece('P')
-        game.move(['a', 7], ['a', 5])
-        expect(game.en_passant).to eq('a6')
+        game.square_at(['b', 4]).place_piece('p')
+        game.move(['a', 2], ['a', 4])
+        expect(game.en_passant).to eq('a3')
       end
 
       it 'sets it to "-" if no en passant' do
@@ -115,9 +115,13 @@ describe Game do
         expect { game.move(rook.coord, ['h', 7]) }.not_to change(game, :draw_moves)
       end
 
-      it 'increments the turn counter by 0.5' do
-        king = game.piece_at(['e', 1])
-        expect { game.move(king.coord, ['e', 2]) }.to change(game, :turn_number).to(1.5)
+      it 'increments turn counter on black moves' do
+        game.move(['e', 1], ['e', 2])
+        expect { game.move(['a', 7], ['a', 6]) }.to change(game, :turn_number).to(2)
+      end
+
+      it 'does not increment turn counter on white moves' do
+        expect { game.move(['a', 1], ['a', 2]) }.not_to change(game, :turn_number)
       end
 
       it 'changes turn variable to opposite color' do

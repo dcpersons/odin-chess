@@ -2,6 +2,7 @@
 
 require_relative '../pieces'
 
+# piece subclass for pawns
 class Pawn < Pieces
   TYPE = 'pawn'
 
@@ -20,6 +21,10 @@ class Pawn < Pieces
 
   def promotable?
     color == 'w' && rank == 7 || color == 'b' && rank == 2
+  end
+
+  def double_step?(start)
+    [start[1] + 2, start[1] - 2].include?(rank)
   end
 
   private
