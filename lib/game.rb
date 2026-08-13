@@ -84,7 +84,7 @@ class Game
     piece = piece_at(target)
     @castle_rights.delete!(castle_value)
     @en_passant = '-'
-    update_en_passant(start, piece) if piece.double_step?(start)
+    update_en_passant(start, piece) if piece&.double_step?(start)
     @turn_number += 1 if @turn == 'b'
     @draw_moves += 1
     @draw_moves = 0 if @pawn_move || @piece_taken

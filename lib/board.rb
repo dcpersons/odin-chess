@@ -36,6 +36,8 @@ module Board
   end
 
   def piece_at(coord)
+    return find_piece('K') if %w[O-O-O O-O].include?(coord[0].downcase)
+
     board.dig(coord[0], coord[1])&.piece
   end
 
