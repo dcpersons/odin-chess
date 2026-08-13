@@ -11,6 +11,10 @@ class Pawn < Pieces
     @game.pawn_move = true
   end
 
+  def symbol
+    color == 'w' ? "\u2659" : "\u265F"
+  end
+
   def valid_moves(pre_check: false)
     moves = color == 'w' ? white_moves : black_moves
     moves.keep_if { |move| @game.on_board?(move) && (valid_step?(move) || valid_take?(move)) }

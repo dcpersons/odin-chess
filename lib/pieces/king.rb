@@ -4,6 +4,10 @@
 class King < Pieces
   TYPE = 'king'
 
+  def symbol
+    color == 'w' ? "\u2654" : "\u265A"
+  end
+
   def valid_moves(pre_check: false)
     moves = king_moves
     moves.keep_if do |move|

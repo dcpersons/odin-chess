@@ -4,6 +4,10 @@
 class Knight < Pieces
   TYPE = 'knight'
 
+  def symbol
+    color == 'w' ? "\u2658" : "\u265E"
+  end
+
   def valid_moves(pre_check: false)
     moves = knight_moves
     moves.keep_if do |move|

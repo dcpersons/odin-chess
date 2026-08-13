@@ -151,137 +151,31 @@ describe Game do
     end
   end
 
-  describe '#find_piece' do
-    context 'when a letter is given with no target' do
-      it 'returns the piece if there is only one' do
-        expect(game.find_piece('K')).to be_a(King)
-      end
-
-      it 'raises an error if there is more than one' do
-        expect { game.find_piece('P') }.to raise_error(StandardError, 'Unspecified piece')
-      end
+  describe '#no_moves?' do
+    it 'returns true if current player has no valid moves' do
+      game = described_class.new('rnbqkbnr/ppp1pppp/3K4/8/3q4/8/PPPP1PPP/RNBQ1BNR w kq - 0 1')
+      expect(game.no_moves?).to be true
     end
 
-    context 'when a letter and target are given' do
-      it 'returns the piece if there is only one match' do
-        expect(game.find_piece('P', nil, nil, ['a', 3]).coord).to eq(['a', 2])
-      end
-
-      it 'returns an error if there are are multiple matches' do
-        game.square_at(['b', 3]).place_piece('p')
-        expect { game.find_piece('P', nil, nil, ['b', 3]) }.to raise_error(StandardError, 'Unspecified piece')
-      end
-    end
-
-    context 'when a letter, target, and file are given' do
-      it 'returns the piece if there is only one match' do
-        game.square_at(['b', 3]).place_piece('p')
-        expect(game.find_piece('P', 'a', nil, ['b', 3]).coord).to eq(['a', 2])
-      end
-
-      it 'raises an error if there are multiple matches' do
-        game.square_at(['a', 2]).place_piece('B')
-        game.square_at(['a', 4]).place_piece('B')
-        expect { game.find_piece('B', 'a', nil, ['b', 3]) }.to raise_error(StandardError, 'Unspecified piece')
-      end
-    end
-
-    context 'when a letter, target, and row are given' do
-      it 'returns the piece if there is only one match' do
-        game.square_at(['b', 5]).place_piece('N')
-        expect(game.find_piece('N', nil, 5, ['a', 3]).coord).to eq(['b', 5])
-      end
-
-      it 'raises an error if there are multiple matches' do
-        game.square_at(['b', 3]).place_piece('p')
-        expect { game.find_piece('P', nil, 2, ['b', 3]).coord }.to raise_error(StandardError, 'Unspecified piece')
-      end
-    end
-
-    context 'when letter, target, file, and row are given' do
-      it 'returns the piece' do
-        expect(game.find_piece('P', 'a', 2, ['a', 3]).coord).to eq(['a', 2])
-      end
+    it 'returns false if current player has a valid move' do
+      expect(game.no_moves?).to be false
     end
   end
 
-  describe '#decipher' do
-    it 'raises an error if no piece at location' do
-      expect { game.decipher('a3a4') }.to raise_error(StandardError, 'Invalid move')
+  describe '#check_mate?' do
+    it 'returns true if current player is in check mate' do
+      game = described_class.new('rnbqkbnr/ppp1pppp/3K4/8/3q4/8/PPPP1PPP/RNBQ1BNR w kq - 0 1')
+      expect(game.check_mate?).to be true
     end
 
-    it 'raises an error if piece at location cannot perform move to target' do
-      expect { game.decipher('a2a5') }.to raise_error(StandardError, 'Invalid move')
+    it 'returns false if current player is in check but not check mate' do
+      game = described_class.new('rnb1kbnr/pppppppp/8/8/8/8/PPPPqPPP/RNBQKBNR w KQkq - 0 1')
+      expect(game.check_mate?).to be false
     end
 
-    it 'requires an addition letter at the end when promoting a pawn' do
-      game.square_at(['a', 7]).place_piece('P')
-      expect(game.decipher('a7b8Q')).to eq([['a', 7], ['b', 8, 'Q']])
-    end
-
-    it 'raises an error when moving a pawn to last rank and no promotion is specified' do
-      game.square_at(['a', 7]).place_piece('P')
-      expect { game.decipher('a7b8') }.to raise_error(StandardError, 'Unspecified promotion')
-    end
-
-    context 'when starting rank, starting file, and target are given' do
-      it 'returns correct piece location and target arrays' do
-        expect(game.decipher('a2a3')).to eq([['a', 2], ['a', 3]])
-      end
-    end
-
-    context 'when given a target with no specified piece' do
-      it 'infers piece is a pawn and returns the correct location and target arrays' do
-        expect(game.decipher('a3')).to eq([['a', 2], ['a', 3]])
-      end
-
-      it 'raises an error when multiple pawns can move to target' do
-        game.square_at(['b', 3]).place_piece('p')
-        expect { game.decipher('b3') }.to raise_error(StandardError, 'Unspecified piece')
-      end
-    end
-
-    context 'when given a piece letter and target' do
-      it 'returns the correct piece location and target arrays' do
-        expect(game.decipher('Nc3')).to eq([['b', 1], ['c', 3]])
-      end
-
-      it 'raises and error when multiple of specified piece can move to target' do
-        game.square_at(['b', 5]).place_piece('N')
-        expect { game.decipher('Nc3') }.to raise_error(StandardError, 'Unspecified piece')
-      end
-    end
-
-    context 'when given a file and target' do
-      it 'returns the correct piece location and target arrays' do
-        game.square_at(['d', 1]).place_piece('N')
-        expect(game.decipher('Nbc3')).to eq([['b', 1], ['c', 3]])
-      end
-
-      it 'raises an error when multiple of specified piece in file can move to target' do
-        game.square_at(['b', 5]).place_piece('N')
-        expect { game.decipher('Nbc3') }.to raise_error(StandardError, 'Unspecified piece')
-      end
-    end
-
-    context 'when given a rank and target' do
-      it 'returns correct piece location and target arrays' do
-        game.square_at(['b', 5]).place_piece('N')
-        expect(game.decipher('N1c3')).to eq([['b', 1], ['c', 3]])
-      end
-
-      it 'raises an error when multiple of specified piece in row can move to target' do
-        game.square_at(['d', 1]).place_piece('N')
-        expect { game.decipher('N1c3') }.to raise_error(StandardError, 'Unspecified piece')
-      end
-    end
-
-    context 'when castle is called for' do
-      it 'returns king location and castle symbol arrays' do
-        game.square_at(['f', 1]).piece = nil
-        game.square_at(['g', 1]).piece = nil
-        expect(game.decipher('O-O')).to eq([['e', 1], ['O-O']])
-      end
+    it 'returns false if current player is not in check and has no valid moves' do
+      game = described_class.new('K6k/2q5/8/8/8/8/8/8 w - - 0 1')
+      expect(game.check_mate?).to be false
     end
   end
 end

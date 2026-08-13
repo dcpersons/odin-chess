@@ -13,6 +13,15 @@ class Square
     @piece = nil
   end
 
+  def to_s
+    symbol = piece ? " #{piece.symbol} " : '   '
+    if %w[a c e g].include?(file) && rank.odd? || %w[b d f h].include?(file) && rank.even?
+      symbol.colorize(color: :black, background: :gray)
+    else
+      symbol.colorize(color: :black, background: :white)
+    end
+  end
+
   def place_piece(letter)
     color = letter.match?(/[[:upper:]]/) ? 'w' : 'b'
     pieces = { 'r' => Rook, 'n' => Knight, 'b' => Bishop, 'q' => Queen, 'k' => King, 'p' => Pawn }

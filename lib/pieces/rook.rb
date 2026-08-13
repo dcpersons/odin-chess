@@ -4,6 +4,10 @@
 class Rook < Pieces
   TYPE = 'rook'
 
+  def symbol
+    color == 'w' ? "\u2656" : "\u265C"
+  end
+
   def valid_moves(pre_check: false)
     cardinal_moves(pre_check: pre_check)
   end
