@@ -63,78 +63,93 @@ describe Game do
       end
     end
 
-    context 'when en passant value changes' do
-      it 'sets it to the proper space' do
-        game.square_at(['b', 4]).place_piece('p')
-        game.move(['a', 2], ['a', 4])
-        expect(game.en_passant).to eq('a3')
-      end
-
-      it 'sets it to "-" if no en passant' do
-        game.instance_variable_set(:@en_passant, 'a3')
-        game.move(['a', 2], ['a', 4])
-        expect(game.en_passant).to eq('-')
+    context 'when promoting a pawn' do
+      it 'moves and promotes pawn if promotion is specified' do
+        game.square_at(['a', 7]).place_piece('P')
+        game.move(['a', 7], ['b', 8, 'Q'])
+        expect(game.piece_at(['b', 8])).to be_a(Queen)
       end
     end
+  end
 
+  describe '#update_variables' do
     context 'when game variables update' do
       let(:game) { described_class.new('rnbqkbnr/pppppppp/8/8/8/8/8/RNBQKBNR w KQkq - 0 1') }
 
       it 'removes queen side when queen side rook moves' do
         rook = game.piece_at(['a', 1])
         game.move(rook.coord, ['a', 2])
+        game.update_variables(rook.coord, ['a', 2])
         expect(game.castle_rights).to eq('Kkq')
       end
 
       it 'removes king side when king side rook moves' do
         rook = game.piece_at(['h', 1])
         game.move(rook.coord, ['h', 2])
+        game.update_variables(rook.coord, ['h', 2])
         expect(game.castle_rights).to eq('Qkq')
       end
 
       it 'removes both sides when king moves' do
         king = game.piece_at(['e', 1])
         game.move(king.coord, ['e', 2])
+        game.update_variables(king.coord, ['e', 2])
         expect(game.castle_rights).to eq('kq')
       end
 
       it 'increments stalemate move counter when a non-pawn moves without taking' do
         king = game.piece_at(['e', 1])
-        expect { game.move(king.coord, ['e', 2]) }.to change(game, :draw_moves).by(1)
+        game.move(king.coord, ['e', 2])
+        expect { game.update_variables(king.coord, ['e', 2]) }.to change(game, :draw_moves).by(1)
       end
 
       it 'resets stalemate move counter to 0 when a pawn moves' do
         king = game.piece_at(['e', 1])
         pawn = game.piece_at(['e', 7])
         game.move(king.coord, ['e', 2])
-        expect { game.move(pawn.coord, ['e', 6]) }.to change(game, :draw_moves).to(0)
+        game.update_variables(king.coord, ['e', 2])
+        game.move(pawn.coord, ['e', 6])
+        expect { game.update_variables(pawn.coord, ['e', 6]) }.to change(game, :draw_moves).to(0)
       end
 
       it 'resets stalemate move counter to 0 when a piece is taken' do
         rook = game.piece_at(['h', 1])
-        expect { game.move(rook.coord, ['h', 7]) }.not_to change(game, :draw_moves)
+        game.move(rook.coord, ['h', 7])
+        expect { game.update_variables(rook.coord, ['h', 7]) }.not_to change(game, :draw_moves)
       end
 
       it 'increments turn counter on black moves' do
         game.move(['e', 1], ['e', 2])
-        expect { game.move(['a', 7], ['a', 6]) }.to change(game, :turn_number).to(2)
+        game.update_variables(['e', 1], ['e', 2])
+        game.move(['a', 7], ['a', 6])
+        expect { game.update_variables(['a', 7], ['a', 6]) }.to change(game, :turn_number).to(2)
       end
 
       it 'does not increment turn counter on white moves' do
-        expect { game.move(['a', 1], ['a', 2]) }.not_to change(game, :turn_number)
+        game.move(['a', 1], ['a', 2])
+        expect { game.update_variables(['a', 1], ['a', 2]) }.not_to change(game, :turn_number)
       end
 
       it 'changes turn variable to opposite color' do
         king = game.piece_at(['e', 1])
-        expect { game.move(king.coord, ['e', 2]) }.to change(game, :turn).to('b')
+        game.move(king.coord, ['e', 2])
+        expect { game.update_variables(king.coord, ['e', 2]) }.to change(game, :turn).to('b')
       end
     end
 
-    context 'when promoting a pawn' do
-      it 'moves and promotes pawn if promotion is specified' do
-        game.square_at(['a', 7]).place_piece('P')
-        game.move(['a', 7], ['b', 8], 'Q')
-        expect(game.piece_at(['b', 8])).to be_a(Queen)
+    context 'when en passant value changes' do
+      it 'sets it to the proper space' do
+        game.square_at(['b', 4]).place_piece('p')
+        game.move(['a', 2], ['a', 4])
+        game.update_variables(['a', 2], ['a', 4])
+        expect(game.en_passant).to eq('a3')
+      end
+
+      it 'sets it to "-" if no en passant' do
+        game.instance_variable_set(:@en_passant, 'a3')
+        game.move(['a', 2], ['a', 4])
+        game.update_variables(['a', 2], ['a', 4])
+        expect(game.en_passant).to eq('-')
       end
     end
   end

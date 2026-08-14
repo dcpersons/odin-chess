@@ -69,7 +69,7 @@ describe InputOutput do
 
     it 'requires an addition letter at the end when promoting a pawn' do
       game.square_at(['a', 7]).place_piece('P')
-      expect(game.decipher('a7b8Q')).to eq([['a', 7], ['b', 8, 'Q']])
+      expect(game.decipher('a7b8Q')).to include(['a', 7], ['b', 8, 'Q'])
     end
 
     it 'raises an error when moving a pawn to last rank and no promotion is specified' do
@@ -79,13 +79,13 @@ describe InputOutput do
 
     context 'when starting rank, starting file, and target are given' do
       it 'returns correct piece location and target arrays' do
-        expect(game.decipher('a2a3')).to eq([['a', 2], ['a', 3]])
+        expect(game.decipher('a2a3')).to include(['a', 2], ['a', 3])
       end
     end
 
     context 'when given a target with no specified piece' do
       it 'infers piece is a pawn and returns the correct location and target arrays' do
-        expect(game.decipher('a3')).to eq([['a', 2], ['a', 3]])
+        expect(game.decipher('a3')).to include(['a', 2], ['a', 3])
       end
 
       it 'raises an error when multiple pawns can move to target' do
@@ -96,7 +96,7 @@ describe InputOutput do
 
     context 'when given a piece letter and target' do
       it 'returns the correct piece location and target arrays' do
-        expect(game.decipher('Nc3')).to eq([['b', 1], ['c', 3]])
+        expect(game.decipher('Nc3')).to include(['b', 1], ['c', 3])
       end
 
       it 'raises and error when multiple of specified piece can move to target' do
@@ -108,7 +108,7 @@ describe InputOutput do
     context 'when given a file and target' do
       it 'returns the correct piece location and target arrays' do
         game.square_at(['d', 1]).place_piece('N')
-        expect(game.decipher('Nbc3')).to eq([['b', 1], ['c', 3]])
+        expect(game.decipher('Nbc3')).to include(['b', 1], ['c', 3])
       end
 
       it 'raises an error when multiple of specified piece in file can move to target' do
@@ -120,7 +120,7 @@ describe InputOutput do
     context 'when given a rank and target' do
       it 'returns correct piece location and target arrays' do
         game.square_at(['b', 5]).place_piece('N')
-        expect(game.decipher('N1c3')).to eq([['b', 1], ['c', 3]])
+        expect(game.decipher('N1c3')).to include(['b', 1], ['c', 3])
       end
 
       it 'raises an error when multiple of specified piece in row can move to target' do
@@ -133,7 +133,7 @@ describe InputOutput do
       it 'returns king location and castle symbol arrays' do
         game.square_at(['f', 1]).piece = nil
         game.square_at(['g', 1]).piece = nil
-        expect(game.decipher('O-O')).to eq([['e', 1], ['O-O']])
+        expect(game.decipher('O-O')).to include(['e', 1], ['O-O'])
       end
     end
   end

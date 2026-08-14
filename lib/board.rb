@@ -87,7 +87,9 @@ module Board
     fen[0..-2].join
   end
 
-  def variables_to_fen
-    [@turn, @castle_rights, @en_passant, @draw_moves, @turn_number].join(' ')
+  def variables_to_fen(history: false)
+    variables = [@turn, @castle_rights, @en_passant]
+    variables | [@draw_moves, @turn_number] unless history
+    variables.join(' ')
   end
 end

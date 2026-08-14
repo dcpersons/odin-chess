@@ -29,7 +29,7 @@ describe King do
   end
 
   describe '#castle_kingside' do
-    it 'moves king from file E to G and rook from file H to F' do
+    it 'moves king from file E to G and rook from file H to F' do # rubocop:disable RSpec/ExampleLength
       game.square_at(['f', 1]).piece = nil
       game.square_at(['g', 1]).piece = nil
       king.castle_kingside

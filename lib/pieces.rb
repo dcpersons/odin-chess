@@ -23,7 +23,7 @@ class Pieces
 
   def illegal_check_move?(move)
     sim_game = Game.new(@game.to_fen)
-    sim_game.move(coord, move, no_update: true)
+    sim_game.move(coord, move)
     sim_game.check?
   end
 
