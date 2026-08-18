@@ -39,13 +39,28 @@ class Game
 
   def move(start, target)
     piece = piece_at(start)
-    promotion = target.pop if target.length > 2
 
-    if target == ['O-O-O'] then piece.castle_queenside
-    elsif target == ['O-O'] then piece.castle_kingside
-    else standard_move(piece, target, promotion)
+    return piece.castle_queenside if target == ['O-O-O']
+    return piece.castle_kingside if target == ['O-O']
+
+    if target.length > 2
+      promotion = target.pop
+      promotion.downcase! if piece.color == 'b'
     end
-    @moved = piece.castle_value
+    standard_move(piece, target, promotion)
+  end
+
+  def update_variables(start, target)
+    piece = piece_at(target)
+    @history << [@input]
+    @castle_rights = @castle_rights.delete(@moved)
+    @en_passant = '-'
+    update_en_passant(start, piece) if piece&.double_step?(start)
+    @turn_number += 1 if @turn == 'b'
+    @draw_moves += 1
+    @draw_moves = 0 if @pawn_move || @piece_taken
+    @turn = next_turn
+    @history.last << "#{board_to_fen} #{variables_to_fen(history: true)}"
   end
 
   def check?
@@ -79,24 +94,16 @@ class Game
     pieces.keep_if { |piece| piece.color == color }
   end
 
-  def update_variables(start, target)
-    @history << [@input]
-    piece = piece_at(target)
-    @castle_rights.delete!(@moved)
-    @en_passant = '-'
-    update_en_passant(start, piece) if piece&.double_step?(start)
-    @turn_number += 1 if @turn == 'b'
-    @draw_moves += 1
-    @draw_moves = 0 if @pawn_move || @piece_taken
-    @turn = next_turn
-    @history.last << "#{board_to_fen} #{variables_to_fen(history: true)}"
+  def move_info(piece, target)
+    @piece_taken = !empty_space?(target)
+    @moved = "#{piece.castle_value}#{piece_at(target)&.castle_value}"
+    @pawn_move = piece.is_a?(Pawn)
   end
 
   private
 
   def standard_move(piece, target, promotion)
-    promotion = promotion&.downcase if piece.color == 'b'
-    self.piece_taken = !empty_space?(target)
+    move_info(piece, target)
     en_passant_take(target) if en_passant == target.join && piece.is_a?(Pawn)
     square_at(piece.coord).piece = nil
     square_at(target).place_piece(promotion || piece.to_letter)

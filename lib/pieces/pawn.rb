@@ -6,19 +6,14 @@ require_relative '../pieces'
 class Pawn < Pieces
   TYPE = 'pawn'
 
-  def initialize(color, file, rank, game)
-    super
-    @game.pawn_move = true
-  end
-
   def symbol
     color == 'w' ? "\u2659" : "\u265F"
   end
 
   def valid_moves(pre_check: false)
-    moves = color == 'w' ? white_moves : black_moves
-    moves.keep_if { |move| @game.on_board?(move) && (valid_step?(move) || valid_take?(move)) }
-    moves.delete_if { |move| !pre_check && illegal_check_move?(move) }
+    moves = pawn_moves
+    moves.keep_if { |move| valid_step?(move) || valid_take?(move) }
+    moves.delete_if { |move| illegal_check_move?(move) } unless pre_check
     moves = moves.product(%w[R N B Q]).map(&:flatten) if promotable?
     moves
   end
@@ -33,28 +28,25 @@ class Pawn < Pieces
 
   private
 
-  def white_moves
-    [[@file, @rank + 1], [@file, @rank + 2],
-     [file_left(@file), @rank + 1], [file_right(@file), @rank + 1]]
-  end
-
-  def black_moves
-    [[@file, @rank - 1], [@file, @rank - 2],
-     [file_left(@file), @rank - 1], [file_right(@file), @rank - 1]]
+  def pawn_moves
+    moves = if color == 'w'
+              [[@file, @rank + 1], [@file, @rank + 2],
+               [file_left(@file), @rank + 1], [file_right(@file), @rank + 1]]
+            else
+              [[@file, @rank - 1], [@file, @rank - 2],
+               [file_left(@file), @rank - 1], [file_right(@file), @rank - 1]]
+            end
+    moves.keep_if { |move| @game.on_board?(move) }
   end
 
   def valid_step?(move)
-    return true if @game.empty_space?(move) && move[0] == file &&
-                   ([rank + 1, rank - 1].include?(move[1]) || rank == 2 || rank == 7)
-
-    false
+    @game.empty_space?(move) && move[0] == file &&
+      ([rank + 1, rank - 1].include?(move[1]) || rank == 2 || rank == 7)
   end
 
   def valid_take?(move)
-    return true if move[0] != file &&
-                   (@game.en_passant == move.join ||
-                   @game.other_color?(move, color))
-
-    false
+    move[0] != file &&
+      (@game.en_passant == move.join ||
+      @game.other_color?(move, color))
   end
 end

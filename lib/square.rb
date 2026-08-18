@@ -29,8 +29,6 @@ class Square
   end
 
   def empty?
-    return true if @piece.nil?
-
-    false
+    @piece.nil?
   end
 end

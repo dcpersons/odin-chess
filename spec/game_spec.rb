@@ -104,18 +104,22 @@ describe Game do
       end
 
       it 'resets stalemate move counter to 0 when a pawn moves' do
-        king = game.piece_at(['e', 1])
-        pawn = game.piece_at(['e', 7])
-        game.move(king.coord, ['e', 2])
-        game.update_variables(king.coord, ['e', 2])
-        game.move(pawn.coord, ['e', 6])
-        expect { game.update_variables(pawn.coord, ['e', 6]) }.to change(game, :draw_moves).to(0)
+        game.move(['e', 1], ['e', 2])
+        game.update_variables(['e', 1], ['e', 2])
+        game.move(['e', 7], ['e', 6])
+        expect { game.update_variables(['e', 7], ['e', 6]) }.to change(game, :draw_moves).to(0)
       end
 
       it 'resets stalemate move counter to 0 when a piece is taken' do
         rook = game.piece_at(['h', 1])
         game.move(rook.coord, ['h', 7])
         expect { game.update_variables(rook.coord, ['h', 7]) }.not_to change(game, :draw_moves)
+      end
+
+      it 'resets stalemate move counter to 0 when a pawn is moved and promoted' do
+        game = described_class.new('1nbqkbnr/Pppppppp/8/8/8/8/1PPPPPPP/RNBQKBNR w KQk - 10 11')
+        game.move(['a', 7], ['a', 8, 'Q'])
+        expect { game.update_variables(['a', 7], ['a', 8]) }.to change(game, :draw_moves).to(0)
       end
 
       it 'increments turn counter on black moves' do

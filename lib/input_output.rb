@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # module for chess inputs and outputs
-module InputOutput
+module InputOutput # rubocop:disable Metrics/ModuleLength
   def player_move
     loop do
       put_board
@@ -20,11 +20,12 @@ module InputOutput
   end
 
   # turns player given string into array and calls #find_piece on it
-  # returns two coordinate arrays for #move and a string for @history
+  # returns two coordinate arrays for #move and sets @input to later add to @history
   def decipher(input) # rubocop:disable Metrics/AbcSize
     if ['O-O-O', 'O-O'].include?(input.upcase)
-      piece = find_piece('K')
+      piece = find_piece('K', [input.upcase])
       target = [input.upcase]
+      @input = input.upcase
     else
       move = input.split('') - ['x']
       letter = %w[R N B Q K P].include?(move[0]) ? move.shift : 'P'
@@ -32,8 +33,8 @@ module InputOutput
       target = [move.delete_at(-2), move.pop.to_i, promotion].compact
       file = move.shift if move[0].to_i.zero?
       rank = move.shift&.to_i
-      piece = find_piece(letter, file, rank, target)
-      @input = fix_input(input, target, piece)
+      piece = find_piece(letter, target, file, rank)
+      @input = "#{letter unless letter == 'P'}#{file}#{rank}#{'x' if piece_at(target)}#{target.join('')}"
 
     end
     [piece.coord, target]
@@ -42,7 +43,7 @@ module InputOutput
   # Returns a piece if enough disambiguators are given
   # Raises an error if no valid piece/move
   # Raises an error if not enough disambiguators
-  def find_piece(letter, file = nil, rank = nil, target = nil) # rubocop:disable Metrics/CyclomaticComplexity
+  def find_piece(letter, target = nil, file = nil, rank = nil) # rubocop:disable Metrics/CyclomaticComplexity
     pieces = find_pieces.select do |piece|
       piece.to_letter.upcase == letter &&
         (file.nil? || piece.file == file) &&
@@ -103,22 +104,6 @@ module InputOutput
 
   private
 
-  def fix_input(input, target, piece)
-    if input.slice(0..1) == piece.coord.join('')
-      prepend = input.slice(0..1)
-    elsif input.chr == piece.file || input.chr.to_i == piece.rank
-      prepend = input.chr
-    end
-    target_clone = target.clone
-    if piece_at(target)
-      target.unshift('x')
-      target.unshift('x') piece.file + input unless %w[R N B Q K P].include?(input[0])
-      prepend.to_s + input.slice(0..3)
-    else
-      prepend.to_s + target.to_s
-    end
-  end
-
   def put_history
     loop do
       puts 'View history? (y/n)'
@@ -126,7 +111,7 @@ module InputOutput
       if response == 'y'
         @history.each_slice(2) do |move1, move2|
           puts '~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-          puts "#{move1.first} - #{move2&.first}"
+          puts "#{@history.index(move1) / 2 + 1}  #{move1.first}  #{move2&.first}"
         end
       end
       return if %w[y n].include?(response)

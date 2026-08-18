@@ -13,11 +13,10 @@ class Rook < Pieces
   end
 
   def castle_value
-    if coord == ['a', color == 'w' ? 1 : 8]
-      return color == 'w' ? 'Q' : 'q'
-    elsif coord == ['h', color == 'w' ? 1 : 8]
-      return color == 'w' ? 'K' : 'k'
-    end
+    return 'Q' if coord == ['a', 1]
+    return 'q' if coord == ['a', 8]
+    return 'K' if coord == ['h', 1]
+    return 'k' if coord == ['h', 8]
 
     'N/A'
   end

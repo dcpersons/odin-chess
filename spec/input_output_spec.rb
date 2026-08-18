@@ -17,43 +17,43 @@ describe InputOutput do
 
     context 'when a letter and target are given' do
       it 'returns the piece if there is only one match' do
-        expect(game.find_piece('P', nil, nil, ['a', 3]).coord).to eq(['a', 2])
+        expect(game.find_piece('P', ['a', 3]).coord).to eq(['a', 2])
       end
 
       it 'returns an error if there are are multiple matches' do
         game.square_at(['b', 3]).place_piece('p')
-        expect { game.find_piece('P', nil, nil, ['b', 3]) }.to raise_error(StandardError, 'Unspecified piece')
+        expect { game.find_piece('P', ['b', 3]) }.to raise_error(StandardError, 'Unspecified piece')
       end
     end
 
     context 'when a letter, target, and file are given' do
       it 'returns the piece if there is only one match' do
         game.square_at(['b', 3]).place_piece('p')
-        expect(game.find_piece('P', 'a', nil, ['b', 3]).coord).to eq(['a', 2])
+        expect(game.find_piece('P', ['b', 3], 'a').coord).to eq(['a', 2])
       end
 
       it 'raises an error if there are multiple matches' do
         game.square_at(['a', 2]).place_piece('B')
         game.square_at(['a', 4]).place_piece('B')
-        expect { game.find_piece('B', 'a', nil, ['b', 3]) }.to raise_error(StandardError, 'Unspecified piece')
+        expect { game.find_piece('B', ['b', 3], 'a') }.to raise_error(StandardError, 'Unspecified piece')
       end
     end
 
     context 'when a letter, target, and row are given' do
       it 'returns the piece if there is only one match' do
         game.square_at(['b', 5]).place_piece('N')
-        expect(game.find_piece('N', nil, 5, ['a', 3]).coord).to eq(['b', 5])
+        expect(game.find_piece('N', ['a', 3], nil, 5).coord).to eq(['b', 5])
       end
 
       it 'raises an error if there are multiple matches' do
         game.square_at(['b', 3]).place_piece('p')
-        expect { game.find_piece('P', nil, 2, ['b', 3]).coord }.to raise_error(StandardError, 'Unspecified piece')
+        expect { game.find_piece('P', ['b', 3], nil, 2).coord }.to raise_error(StandardError, 'Unspecified piece')
       end
     end
 
     context 'when letter, target, file, and row are given' do
       it 'returns the piece' do
-        expect(game.find_piece('P', 'a', 2, ['a', 3]).coord).to eq(['a', 2])
+        expect(game.find_piece('P', ['a', 3], 'a', 2).coord).to eq(['a', 2])
       end
     end
   end
