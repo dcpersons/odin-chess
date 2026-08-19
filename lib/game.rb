@@ -10,22 +10,23 @@ require 'yaml'
 
 # class for creating Games of chess
 class Game
-  attr_reader :board, :turn, :castle_rights, :en_passant, :draw_moves, :turn_number
+  attr_reader :board, :turn, :castle_rights, :en_passant, :draw_moves, :turn_number, :cpu
   attr_writer :pawn_move, :piece_taken
 
   include InputOutput
   include Board
   include SaveLoad
 
-  def initialize(fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', history = [])
+  def initialize(fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', history = [], cpu = nil)
     @board = make_board
     @history = history
+    @cpu_turn = cpu
     setup_game(fen)
   end
 
   def play_game
     loop do
-      move = player_move
+      move = @turn == @cpu_turn ? cpu_move : player_move
       break if move == :saved
 
       move(move[0], move[1])
@@ -35,6 +36,11 @@ class Game
       break finish(:draw) if @draw_moves == 50
       break finish(:recursion) if recursion?
     end
+  end
+
+  def cpu_game
+    @cpu_turn = %w[w b].sample
+    play_game
   end
 
   def move(start, target)

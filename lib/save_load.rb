@@ -5,7 +5,7 @@ module SaveLoad
   def self.load_game
     loaded = choose_save
     game = YAML.load_file("./saves/#{loaded}.yml")
-    Game.new(game[:fen], game[:history])
+    Game.new(game[:fen], game[:history], game[:cpu_turn])
   end
 
   def self.choose_save
@@ -24,7 +24,8 @@ module SaveLoad
     file = File.new("saves/#{name}.yml", 'w')
     file.write(YAML.dump({
                            fen: to_fen,
-                           history: @history
+                           history: @history,
+                           cpu_turn: @cpu_turn
                          }))
     file.fsync
     :saved

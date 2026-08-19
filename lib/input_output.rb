@@ -2,10 +2,10 @@
 
 # module for chess inputs and outputs
 module InputOutput # rubocop:disable Metrics/ModuleLength
-  def player_move
+  def player_move # rubocop:disable Metrics/MethodLength
     loop do
       put_board
-      puts "#{@turn == 'w' ? 'White' : 'Black'} to move."
+      puts "#{@turn == 'w' ? 'White' : 'Black'} to move. (Player)"
       puts '~~~~~~~~~~~~~~~~~~~~~~~~~~~'
       move = gets.chomp
       return save if move.downcase == 'save'
@@ -19,9 +19,26 @@ module InputOutput # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  # turns player given string into array and calls #find_piece on it
+  def cpu_move
+    put_board
+    puts "#{@turn == 'w' ? 'White' : 'Black'} to move. (CPU)"
+    puts '~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    sleep(1)
+    pieces = find_pieces
+    pieces.delete_if { |piece| piece.valid_moves.empty? }
+    piece = pieces.sample
+    move = piece.valid_moves.sample
+    @input = if [['O-O-O'], ['O-O']].include?(move)
+               move[0].to_s
+             else
+               "#{piece.to_letter.upcase unless piece.is_a?(Pawn)}#{piece.coord.join}#{'x' if piece_at(move)}#{move.join}"
+             end
+    [piece.coord, move]
+  end
+
+  # breaks down player given string and calls #find_piece on it
   # returns two coordinate arrays for #move and sets @input to later add to @history
-  def decipher(input) # rubocop:disable Metrics/AbcSize
+  def decipher(input) # rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
     if ['O-O-O', 'O-O'].include?(input.upcase)
       piece = find_piece('K', [input.upcase])
       target = [input.upcase]
@@ -34,7 +51,7 @@ module InputOutput # rubocop:disable Metrics/ModuleLength
       file = move.shift if move[0].to_i.zero?
       rank = move.shift&.to_i
       piece = find_piece(letter, target, file, rank)
-      @input = "#{letter unless letter == 'P'}#{file}#{rank}#{'x' if piece_at(target)}#{target.join('')}"
+      @input = "#{letter unless letter == 'P'}#{file}#{rank}#{'x' if piece_at(target)}#{target.join}"
 
     end
     [piece.coord, target]
@@ -85,7 +102,7 @@ module InputOutput # rubocop:disable Metrics/ModuleLength
     examples if gets.chomp.downcase == 'y'
   end
 
-  def finish(cause)
+  def finish(cause) # rubocop:disable Metrics/MethodLength
     put_board(no_check: true)
     puts '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     case cause
@@ -104,7 +121,7 @@ module InputOutput # rubocop:disable Metrics/ModuleLength
 
   private
 
-  def put_history
+  def put_history # rubocop:disable Metrics/MethodLength
     loop do
       puts 'View history? (y/n)'
       response = gets.chomp.downcase
