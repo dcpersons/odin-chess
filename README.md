@@ -3,7 +3,7 @@ A basic command-line chess program written in Ruby for The Odin Project.
 Supports player vs player and a very basic CPU that chooses its moves randomly.
 
 ## Installation
-- You will need to install @ruby and @rubygems.
+- You will need to install [ruby](https://www.ruby-lang.org/en/documentation/installation/) and [rubygems](https://rubygems.org/pages/download).
 - In the terminal, navigate to the program's folder. (e.g. ~/Downloads/odin-chess)
 - Enter the following into your terminal:
 `bundle install`
