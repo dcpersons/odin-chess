@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'lib/game'
+require 'bundler'
 
 loop do
   puts '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'

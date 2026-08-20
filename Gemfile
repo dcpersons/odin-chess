@@ -13,3 +13,5 @@ gem 'rubocop-rspec', '~> 3.10'
 gem 'pry-byebug', '~> 3.12'
 
 gem 'colorize', '~> 1.1'
+
+gem 'yaml', '~> 0.4.0'
